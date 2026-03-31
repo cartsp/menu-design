@@ -54,9 +54,9 @@ else
                     </div>
                     <div class="flex items-center gap-4 md:gap-8">
                         <nav class="hidden md:flex gap-8 items-center">
-                            <a class="nav-link text-white font-semibold text-sm cursor-pointer">Home</a>
-                            <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Settings</a>
-                            <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Help</a>
+                            <span class="nav-link text-white font-semibold text-sm cursor-default">Home</span>
+                            <span class="nav-link text-white/40 font-semibold text-sm cursor-default select-none">Settings</span>
+                            <span class="nav-link text-white/40 font-semibold text-sm cursor-default select-none">Help</span>
                         </nav>
                         <div class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden
                                     border-2 border-white/40 cursor-pointer
@@ -80,8 +80,7 @@ else
                                   OrbAccent="@card.OrbAccent"
                                   Title="@card.Title"
                                   Subtitle="@card.Subtitle"
-                                  IconExtraCss="@card.IconExtraCss"
-                                  SoundEnabled="@_soundEnabled" />
+                                  IconExtraCss="@card.IconExtraCss" />
                     }
                 </div>
             </main>

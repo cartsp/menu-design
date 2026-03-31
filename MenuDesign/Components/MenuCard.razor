@@ -2,8 +2,7 @@
 
 <button @ref="_ref"
         class="menu-card liquid-glass rounded-[2rem] md:rounded-[2.5rem] animate-card-in"
-        @onclick="HandleClick"
-        @onmouseenter="PlayHover">
+        @onclick="HandleClick">
     <div class="ripple-container"></div>
     <div class="icon-orb w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24
                 flex items-center justify-center shadow-lg @OrbAccent">
@@ -25,7 +24,6 @@
     [Parameter] public string Title { get; set; } = "";
     [Parameter] public string Subtitle { get; set; } = "";
     [Parameter] public string IconExtraCss { get; set; } = "";
-    [Parameter] public bool SoundEnabled { get; set; } = true;
     [Parameter] public EventCallback OnClick { get; set; }
 
     private async Task HandleClick()
@@ -47,23 +45,6 @@
         catch (JSException ex)
         {
             Console.WriteLine($"[MenuCard] Ripple error: {ex.Message}");
-        }
-    }
-
-    private async Task PlayHover()
-    {
-        if (!SoundEnabled) return;
-        try
-        {
-            await JS.InvokeVoidAsync("playHoverBlip");
-        }
-        catch (JSDisconnectedException)
-        {
-            // Runtime shutting down
-        }
-        catch (JSException ex)
-        {
-            Console.WriteLine($"[MenuCard] Hover sound error: {ex.Message}");
         }
     }
 }
