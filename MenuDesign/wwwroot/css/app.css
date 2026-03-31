@@ -106,9 +106,8 @@ html, body {
 /* ═══ Apple Liquid Glass ═══ */
 
 .liquid-glass {
-  /* Eggshell white — high opacity so it reads as WHITE, not blue.
-     The glass effect comes from blur + shadows + highlights, NOT transparency. */
-  background: rgba(252, 252, 250, 0.88);
+  /* Eggshell white — lowered opacity to let the wavy background bleed through. */
+  background: rgba(252, 252, 250, 0.62);
 
   backdrop-filter: blur(30px) saturate(160%);
   -webkit-backdrop-filter: blur(30px) saturate(160%);

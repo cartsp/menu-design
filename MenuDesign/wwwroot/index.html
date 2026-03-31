@@ -41,9 +41,15 @@
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
 
     <script>
-        // ═══ Audio — unlock aggressively on ANY user gesture ═══
+        // ═══ Audio — Safari-compatible pre-rendered buffer approach ═══
+        // Safari refuses to play live Web Audio synthesis on non-gesture events (mouseenter).
+        // Solution: render the blip into an AudioBuffer on the first real user gesture (click),
+        // then replay that buffer on hover. Buffer playback doesn't require a gesture chain.
+
         let _audioCtx = null;
-        let _audioReady = false;
+        let _hoverBuffer = null;
+        let _lastHoverTime = 0;
+        const HOVER_COOLDOWN_MS = 180;
 
         function getAudioCtx() {
             if (!_audioCtx) {
@@ -52,76 +58,102 @@
             return _audioCtx;
         }
 
-        function ensureAudioReady() {
-            if (_audioReady) return;
+        // Render the hover blip into an offline buffer — called once on first gesture
+        function renderHoverBuffer() {
+            if (_hoverBuffer) return;
             const ctx = getAudioCtx();
-            if (ctx.state === 'suspended') {
-                ctx.resume().then(() => { _audioReady = true; });
-            } else if (ctx.state === 'running') {
-                _audioReady = true;
-            }
+            const sampleRate = ctx.sampleRate;
+            const duration = 0.4;
+            const length = Math.ceil(sampleRate * duration);
+            const offCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, length, sampleRate);
+
+            const t = 0; // offline context starts at 0
+
+            // Main tone
+            const osc = offCtx.createOscillator();
+            const oscGain = offCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(660, t);
+            osc.frequency.exponentialRampToValueAtTime(440, t + 0.2);
+            oscGain.gain.setValueAtTime(0.0001, t);
+            oscGain.gain.linearRampToValueAtTime(0.06, t + 0.008);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            osc.connect(oscGain);
+
+            // Sub-harmonic for warmth
+            const sub = offCtx.createOscillator();
+            const subGain = offCtx.createGain();
+            sub.type = 'sine';
+            sub.frequency.setValueAtTime(330, t);
+            sub.frequency.exponentialRampToValueAtTime(220, t + 0.2);
+            subGain.gain.setValueAtTime(0.0001, t);
+            subGain.gain.linearRampToValueAtTime(0.03, t + 0.01);
+            subGain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            sub.connect(subGain);
+
+            oscGain.connect(offCtx.destination);
+            subGain.connect(offCtx.destination);
+
+            osc.start(t);
+            sub.start(t);
+            osc.stop(t + duration);
+            sub.stop(t + duration);
+
+            offCtx.startRendering().then(function(buffer) {
+                _hoverBuffer = buffer;
+                console.log('[Audio] Hover buffer rendered (' + buffer.duration.toFixed(3) + 's)');
+            });
         }
 
-        // Explicit unlock callable from Blazor (used on splash-screen click)
+        function ensureAudioReady() {
+            const ctx = getAudioCtx();
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+            renderHoverBuffer();
+        }
+
+        // Blazor-callable unlock (splash screen click)
         window.unlockAudio = function() { ensureAudioReady(); };
 
-        // Unlock on every possible user gesture — mousedown, touch, keyboard
+        // Blazor sets this to toggle sound on/off
+        window._hoverSoundEnabled = true;
+        window.setHoverSoundEnabled = function(enabled) { window._hoverSoundEnabled = enabled; };
+
+        // Unlock on every possible user gesture
         document.addEventListener('mousedown', ensureAudioReady);
-        document.addEventListener('touchstart', ensureAudioReady);
+        document.addEventListener('touchstart', ensureAudioReady, { passive: true });
+        document.addEventListener('touchend', ensureAudioReady, { passive: true });
         document.addEventListener('keydown', ensureAudioReady);
 
-        // ═══ Soft Nintendo-style hover sound — warm gentle droplet ═══
-        let _lastHoverTime = 0;
-        const HOVER_COOLDOWN_MS = 200;
-
-        window.playHoverBlip = async function() {
+        // ═══ Play hover blip from pre-rendered buffer ═══
+        function playHoverBlipFromBuffer() {
+            if (!_hoverBuffer) return;
+            if (!window._hoverSoundEnabled) return;
             const now = performance.now();
             if (now - _lastHoverTime < HOVER_COOLDOWN_MS) return;
             _lastHoverTime = now;
 
             const ctx = getAudioCtx();
-
-            // Make absolutely sure context is running before scheduling
             if (ctx.state === 'suspended') {
-                await ctx.resume();
-                _audioReady = true;
+                ctx.resume();
             }
 
-            const t = ctx.currentTime;
+            const source = ctx.createBufferSource();
+            source.buffer = _hoverBuffer;
+            source.connect(ctx.destination);
+            source.start(0);
+        }
 
-            // Main tone: warm sine with gentle pitch drop
-            const osc = ctx.createOscillator();
-            const oscGain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(480, t);
-            osc.frequency.exponentialRampToValueAtTime(320, t + 0.25);
-            oscGain.gain.setValueAtTime(0, t);
-            oscGain.gain.linearRampToValueAtTime(0.025, t + 0.01);
-            oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-            osc.connect(oscGain);
+        // Legacy Blazor-callable wrapper (kept for non-Safari browsers)
+        window.playHoverBlip = function() { playHoverBlipFromBuffer(); };
 
-            // Sub-harmonic: low sine one octave down for warmth
-            const sub = ctx.createOscillator();
-            const subGain = ctx.createGain();
-            sub.type = 'sine';
-            sub.frequency.setValueAtTime(240, t);
-            sub.frequency.exponentialRampToValueAtTime(160, t + 0.25);
-            subGain.gain.setValueAtTime(0, t);
-            subGain.gain.linearRampToValueAtTime(0.012, t + 0.015);
-            subGain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-            sub.connect(subGain);
-
-            const master = ctx.createGain();
-            master.gain.value = 0.8;
-            oscGain.connect(master);
-            subGain.connect(master);
-            master.connect(ctx.destination);
-
-            osc.start(t);
-            sub.start(t);
-            osc.stop(t + 0.35);
-            sub.stop(t + 0.3);
-        };
+        // ═══ Hover sound via native JS — uses buffer playback ═══
+        document.addEventListener('pointerenter', function(e) {
+            if (e.target.closest && e.target.closest('.menu-card')) {
+                playHoverBlipFromBuffer();
+            }
+        }, true);
 
         // ═══ Ripple effect on card click ═══
         window.addRipple = function(element) {

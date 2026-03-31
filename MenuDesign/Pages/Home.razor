@@ -181,5 +181,6 @@ else
     private void ToggleSound()
     {
         _soundEnabled = !_soundEnabled;
+        JS.InvokeVoidAsync("setHoverSoundEnabled", _soundEnabled);
     }
 }
