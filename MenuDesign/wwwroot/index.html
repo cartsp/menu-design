@@ -148,7 +148,8 @@
 
         // ═══ Hover sound via native JS — uses buffer playback ═══
         document.addEventListener('pointerenter', function(e) {
-            if (e.target.closest && e.target.closest('.menu-card')) {
+            var card = e.target.closest && e.target.closest('.menu-card');
+            if (card && e.target === card) {
                 playHoverBlipFromBuffer();
             }
         }, true);
