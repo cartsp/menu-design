@@ -55,8 +55,6 @@ jobs:
               }
             }
           "
-          # Also copy the root-level dotnet.js (entry point used by blazor.webassembly.js)
-          cp release/dotnet.js release/wwwroot/_framework/dotnet.js
 
       - name: Rewrite base href for GitHub Pages
         run: sed -i 's|<base href="/" />|<base href="/menu-design/" />|g' release/wwwroot/index.html
