@@ -113,7 +113,10 @@
 
             const source = ctx.createBufferSource();
             source.buffer = _hoverBuffer;
-            source.connect(ctx.destination);
+            const gainNode = ctx.createGain();
+            gainNode.gain.value = 0.15;
+            source.connect(gainNode);
+            gainNode.connect(ctx.destination);
             source.start(0);
         }
 
