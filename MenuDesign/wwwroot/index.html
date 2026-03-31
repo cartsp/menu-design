@@ -48,6 +48,7 @@
 
         let _audioCtx = null;
         let _hoverBuffer = null;
+        let _hoverBufferLoading = false;
         let _lastHoverTime = 0;
         const HOVER_COOLDOWN_MS = 180;
 
@@ -58,51 +59,22 @@
             return _audioCtx;
         }
 
-        // Render the hover blip into an offline buffer — called once on first gesture
-        function renderHoverBuffer() {
-            if (_hoverBuffer) return;
+        // Load the hover WAV file into an AudioBuffer
+        function loadHoverBuffer() {
+            if (_hoverBuffer || _hoverBufferLoading) return;
+            _hoverBufferLoading = true;
             const ctx = getAudioCtx();
-            const sampleRate = ctx.sampleRate;
-            const duration = 0.4;
-            const length = Math.ceil(sampleRate * duration);
-            const offCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, length, sampleRate);
-
-            const t = 0; // offline context starts at 0
-
-            // Main tone
-            const osc = offCtx.createOscillator();
-            const oscGain = offCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(660, t);
-            osc.frequency.exponentialRampToValueAtTime(440, t + 0.2);
-            oscGain.gain.setValueAtTime(0.0001, t);
-            oscGain.gain.linearRampToValueAtTime(0.06, t + 0.008);
-            oscGain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-            osc.connect(oscGain);
-
-            // Sub-harmonic for warmth
-            const sub = offCtx.createOscillator();
-            const subGain = offCtx.createGain();
-            sub.type = 'sine';
-            sub.frequency.setValueAtTime(330, t);
-            sub.frequency.exponentialRampToValueAtTime(220, t + 0.2);
-            subGain.gain.setValueAtTime(0.0001, t);
-            subGain.gain.linearRampToValueAtTime(0.03, t + 0.01);
-            subGain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-            sub.connect(subGain);
-
-            oscGain.connect(offCtx.destination);
-            subGain.connect(offCtx.destination);
-
-            osc.start(t);
-            sub.start(t);
-            osc.stop(t + duration);
-            sub.stop(t + duration);
-
-            offCtx.startRendering().then(function(buffer) {
-                _hoverBuffer = buffer;
-                console.log('[Audio] Hover buffer rendered (' + buffer.duration.toFixed(3) + 's)');
-            });
+            fetch('audio/hover.wav')
+                .then(function(response) { return response.arrayBuffer(); })
+                .then(function(arrayBuffer) { return ctx.decodeAudioData(arrayBuffer); })
+                .then(function(buffer) {
+                    _hoverBuffer = buffer;
+                    console.log('[Audio] Hover sound loaded (' + buffer.duration.toFixed(3) + 's)');
+                })
+                .catch(function(err) {
+                    console.error('[Audio] Failed to load hover sound:', err);
+                    _hoverBufferLoading = false;
+                });
         }
 
         function ensureAudioReady() {
@@ -110,7 +82,7 @@
             if (ctx.state === 'suspended') {
                 ctx.resume();
             }
-            renderHoverBuffer();
+            loadHoverBuffer();
         }
 
         // Blazor-callable unlock (splash screen click)
