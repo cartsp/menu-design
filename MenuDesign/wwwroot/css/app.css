@@ -85,10 +85,6 @@
   }
 }
 
-@keyframes shimmer-sweep {
-  0% { left: -100%; }
-  100% { left: 200%; }
-}
 
 /* ═══ Base Reset ═══ */
 
@@ -143,13 +139,15 @@ html, body {
   transform-origin: bottom center;
   transition:
     transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.4s ease;
 }
 
 /* ── Hover: Lift + Glass Glow ── */
 
 .menu-card:hover {
   transform: scale(1.07);
+  background: rgba(200, 235, 255, 0.6);
   box-shadow:
     0 24px 48px -12px rgba(0, 40, 100, 0.16),
     inset 0 2px 0 rgba(255, 255, 255, 1),
@@ -162,28 +160,6 @@ html, body {
   animation: bob 1.4s ease-in-out infinite;
 }
 
-/* ── Shimmer sweep on hover ── */
-
-.menu-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.35),
-    transparent
-  );
-  z-index: 10;
-  pointer-events: none;
-}
-
-.menu-card:hover::before {
-  animation: shimmer-sweep 0.8s ease-out;
-}
 
 /* ── Active: Soft Pillow Press ── */
 
