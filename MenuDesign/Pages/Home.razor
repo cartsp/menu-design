@@ -40,10 +40,10 @@ else
                     WaveWidth="55"
                     Speed="0.002"
                     Opacity="0.5">
-        <div class="h-screen w-screen font-body text-slate-900 flex flex-col overflow-hidden">
+        <div class="min-h-screen w-screen font-body text-slate-900 flex flex-col overflow-x-hidden">
 
             @* ── Header ── *@
-            <header class="relative z-50 pt-6 px-6 md:pt-8 md:px-8 animate-nav-in">
+            <header class="relative z-50 px-6 md:px-8 animate-nav-in" style="padding-top: clamp(1.5rem, 3vh, 3rem);">
                 <div class="max-w-6xl mx-auto flex justify-between items-center
                             bg-white/10 backdrop-blur-xl rounded-full
                             py-3 px-6 md:py-4 md:px-8
@@ -86,7 +86,7 @@ else
             </main>
 
             @* ── Footer ── *@
-            <footer class="relative z-50 pb-8 md:pb-12 px-6 md:px-8 animate-footer-in">
+            <footer class="relative z-50 px-6 md:px-8 animate-footer-in" style="padding-bottom: clamp(2rem, 5vh, 4rem);">
                 <div class="max-w-6xl mx-auto flex justify-between items-end">
                     <div class="flex gap-3 md:gap-4">
                         <button @onclick="ToggleSound"
