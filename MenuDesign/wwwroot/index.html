@@ -12,25 +12,42 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Google Fonts: Fredoka (headlines) + Plus Jakarta Sans (body) -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=block" rel="stylesheet" />
 
     <!-- Material Symbols Outlined -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
 
     <!-- Tailwind v4 Output -->
     <link rel="stylesheet" href="css/output.css" />
 
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="MenuDesign.styles.css" rel="stylesheet" />
+
+    <style>
+        /* Hide app content until fonts are loaded to prevent FOUT and icon text flash */
+        .app-hidden { opacity: 0; }
+        .app-ready { opacity: 1; transition: opacity 0.3s ease-in; }
+    </style>
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" class="app-hidden">
         <div class="loading-screen">
             <div class="loading-spinner"></div>
             <p style="margin-top: 1rem; opacity: 0.8; font-size: 0.875rem;">Loading Menu Explorer...</p>
         </div>
     </div>
+
+    <script>
+        // Reveal app only after all fonts (including Material Symbols) are loaded
+        document.fonts.ready.then(function() {
+            var app = document.getElementById('app');
+            if (app) {
+                app.classList.remove('app-hidden');
+                app.classList.add('app-ready');
+            }
+        });
+    </script>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.

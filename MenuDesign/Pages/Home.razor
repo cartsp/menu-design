@@ -3,7 +3,12 @@
 
 @inject IJSRuntime JS
 
-@if (!_started)
+@if (!_fontsReady)
+{
+    @* Blank screen while fonts load — prevents FOUT and icon text flash *@
+    <div class="h-screen w-screen bg-azure"></div>
+}
+else if (!_started)
 {
     @* ═══ SPLASH: "Tap to Start" — unlocks audio, then reveals menu ═══ *@
     <div class="h-screen w-screen bg-azure flex flex-col items-center justify-center cursor-pointer select-none"
@@ -155,8 +160,27 @@ else
         new("settings", "bg-slate-400 rounded-full shadow-slate-400/30", "Settings", "Options")
     ];
 
+    private bool _fontsReady = false;
     private bool _started = false;
     private bool _soundEnabled = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("eval", "await document.fonts.ready");
+                _fontsReady = true;
+                StateHasChanged();
+            }
+            catch
+            {
+                _fontsReady = true;
+                StateHasChanged();
+            }
+        }
+    }
 
     private async Task StartApp()
     {
