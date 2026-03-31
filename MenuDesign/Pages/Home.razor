@@ -73,7 +73,7 @@ else
 
             @* ── Main: 6-Card Grid ── *@
             <main class="flex-1 flex items-center justify-center p-4 sm:p-8 md:p-12 relative z-10">
-                <div class="max-w-4xl w-full grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 justify-center items-center">
+                <div class="max-w-6xl w-full grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 justify-center items-center">
                     @foreach (var card in _menuCards)
                     {
                         <MenuCard Icon="@card.Icon"
@@ -87,7 +87,7 @@ else
 
             @* ── Footer ── *@
             <footer class="relative z-50 pb-8 md:pb-12 px-6 md:px-8 animate-footer-in">
-                <div class="max-w-4xl mx-auto flex justify-between items-end">
+                <div class="max-w-6xl mx-auto flex justify-between items-end">
                     <div class="flex gap-3 md:gap-4">
                         <button @onclick="ToggleSound"
                                 class="footer-btn w-11 h-11 md:w-14 md:h-14
