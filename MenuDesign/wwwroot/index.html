@@ -71,7 +71,14 @@
         document.addEventListener('keydown', ensureAudioReady);
 
         // ═══ Soft Nintendo-style hover sound — warm gentle droplet ═══
+        let _lastHoverTime = 0;
+        const HOVER_COOLDOWN_MS = 200;
+
         window.playHoverBlip = async function() {
+            const now = performance.now();
+            if (now - _lastHoverTime < HOVER_COOLDOWN_MS) return;
+            _lastHoverTime = now;
+
             const ctx = getAudioCtx();
 
             // Make absolutely sure context is running before scheduling
@@ -80,28 +87,28 @@
                 _audioReady = true;
             }
 
-            const now = ctx.currentTime;
+            const t = ctx.currentTime;
 
             // Main tone: warm sine with gentle pitch drop
             const osc = ctx.createOscillator();
             const oscGain = ctx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(480, now);
-            osc.frequency.exponentialRampToValueAtTime(320, now + 0.25);
-            oscGain.gain.setValueAtTime(0, now);
-            oscGain.gain.linearRampToValueAtTime(0.025, now + 0.01);
-            oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.frequency.setValueAtTime(480, t);
+            osc.frequency.exponentialRampToValueAtTime(320, t + 0.25);
+            oscGain.gain.setValueAtTime(0, t);
+            oscGain.gain.linearRampToValueAtTime(0.025, t + 0.01);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
             osc.connect(oscGain);
 
             // Sub-harmonic: low sine one octave down for warmth
             const sub = ctx.createOscillator();
             const subGain = ctx.createGain();
             sub.type = 'sine';
-            sub.frequency.setValueAtTime(240, now);
-            sub.frequency.exponentialRampToValueAtTime(160, now + 0.25);
-            subGain.gain.setValueAtTime(0, now);
-            subGain.gain.linearRampToValueAtTime(0.012, now + 0.015);
-            subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            sub.frequency.setValueAtTime(240, t);
+            sub.frequency.exponentialRampToValueAtTime(160, t + 0.25);
+            subGain.gain.setValueAtTime(0, t);
+            subGain.gain.linearRampToValueAtTime(0.012, t + 0.015);
+            subGain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
             sub.connect(subGain);
 
             const master = ctx.createGain();
@@ -110,10 +117,10 @@
             subGain.connect(master);
             master.connect(ctx.destination);
 
-            osc.start(now);
-            sub.start(now);
-            osc.stop(now + 0.35);
-            sub.stop(now + 0.3);
+            osc.start(t);
+            sub.start(t);
+            osc.stop(t + 0.35);
+            sub.stop(t + 0.3);
         };
 
         // ═══ Ripple effect on card click ═══

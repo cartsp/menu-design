@@ -33,103 +33,109 @@
 }
 else
 {
-    <div class="h-screen w-screen bg-azure font-body text-slate-900 flex flex-col overflow-hidden relative">
-        @* ── Atmospheric Gradient Overlay ── *@
-        <div class="fixed inset-0 bg-gradient-overlay pointer-events-none animate-breathe"></div>
+    <WavyBackground Height="100vh"
+                    BackgroundColor="#0091ea"
+                    Colors="@(new[] { "#bae6fd", "#38bdf8", "#0ea5e9", "#06b6d4", "#22d3ee", "#7dd3fc" })"
+                    WaveCount="6"
+                    WaveWidth="55"
+                    Speed="0.002"
+                    Opacity="0.5">
+        <div class="h-screen w-screen font-body text-slate-900 flex flex-col overflow-hidden">
 
-        @* ── Header ── *@
-        <header class="relative z-50 pt-6 px-6 md:pt-8 md:px-8 animate-nav-in">
-            <div class="max-w-6xl mx-auto flex justify-between items-center
-                        bg-white/10 backdrop-blur-xl rounded-full
-                        py-3 px-6 md:py-4 md:px-8
-                        border border-white/20
-                        shadow-lg shadow-black/5">
-                <div class="text-xl md:text-2xl font-bold text-white font-headline tracking-wide select-none">
-                    Menu Explorer
+            @* ── Header ── *@
+            <header class="relative z-50 pt-6 px-6 md:pt-8 md:px-8 animate-nav-in">
+                <div class="max-w-6xl mx-auto flex justify-between items-center
+                            bg-white/10 backdrop-blur-xl rounded-full
+                            py-3 px-6 md:py-4 md:px-8
+                            border border-white/20
+                            shadow-lg shadow-black/5">
+                    <div class="text-xl md:text-2xl font-bold text-white font-headline tracking-wide select-none">
+                        Menu Explorer
+                    </div>
+                    <div class="flex items-center gap-4 md:gap-8">
+                        <nav class="hidden md:flex gap-8 items-center">
+                            <a class="nav-link text-white font-semibold text-sm cursor-pointer">Home</a>
+                            <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Settings</a>
+                            <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Help</a>
+                        </nav>
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden
+                                    border-2 border-white/40 cursor-pointer
+                                    hover:scale-110 transition-transform duration-300
+                                    bg-white/20 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-white text-xl md:text-2xl"
+                                  style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
+                                person
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4 md:gap-8">
-                    <nav class="hidden md:flex gap-8 items-center">
-                        <a class="nav-link text-white font-semibold text-sm cursor-pointer">Home</a>
-                        <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Settings</a>
-                        <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Help</a>
-                    </nav>
-                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden
-                                border-2 border-white/40 cursor-pointer
-                                hover:scale-110 transition-transform duration-300
-                                bg-white/20 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white text-xl md:text-2xl"
-                              style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
-                            person
+            </header>
+
+            @* ── Main: 6-Card Grid ── *@
+            <main class="flex-1 flex items-center justify-center p-4 sm:p-8 md:p-12 relative z-10">
+                <div class="max-w-4xl w-full grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 justify-center items-center">
+                    @foreach (var card in _menuCards)
+                    {
+                        <MenuCard Icon="@card.Icon"
+                                  OrbAccent="@card.OrbAccent"
+                                  Title="@card.Title"
+                                  Subtitle="@card.Subtitle"
+                                  IconExtraCss="@card.IconExtraCss"
+                                  SoundEnabled="@_soundEnabled" />
+                    }
+                </div>
+            </main>
+
+            @* ── Footer ── *@
+            <footer class="relative z-50 pb-8 md:pb-12 px-6 md:px-8 animate-footer-in">
+                <div class="max-w-4xl mx-auto flex justify-between items-end">
+                    <div class="flex gap-3 md:gap-4">
+                        <button @onclick="ToggleSound"
+                                class="footer-btn w-11 h-11 md:w-14 md:h-14
+                                       rounded-full @(_soundEnabled ? "bg-white/20" : "bg-white/8")
+                                       hover:bg-white/30
+                                       text-white flex items-center justify-center
+                                       backdrop-blur-md border border-white/10">
+                            <span class="material-symbols-outlined text-lg md:text-xl"
+                                  style="font-variation-settings: 'FILL' 0;">
+                                @(_soundEnabled ? "volume_up" : "volume_off")
+                            </span>
+                        </button>
+                        <button class="footer-btn w-11 h-11 md:w-14 md:h-14
+                                       rounded-full bg-white/15 hover:bg-white/30
+                                       text-white flex items-center justify-center
+                                       backdrop-blur-md border border-white/10">
+                            <span class="material-symbols-outlined text-lg md:text-xl"
+                                  style="font-variation-settings: 'FILL' 0;">
+                                power_settings_new
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="relative group">
+                        <button class="footer-btn w-12 h-12 md:w-16 md:h-16
+                                       rounded-full bg-white text-sky-600
+                                       shadow-xl shadow-black/10
+                                       flex items-center justify-center">
+                            <span class="material-symbols-outlined text-2xl md:text-3xl"
+                                  style="font-variation-settings: 'FILL' 0, 'wght' 400;">
+                                help_outline
+                            </span>
+                        </button>
+                        <span class="support-tooltip
+                                     absolute right-full mr-3 md:mr-4 bottom-2 md:bottom-3
+                                     bg-white px-4 md:px-6 py-1.5 md:py-2
+                                     rounded-full text-sky-800 font-headline font-bold text-sm
+                                     shadow-lg opacity-0 group-hover:opacity-100
+                                     scale-90 group-hover:scale-100
+                                     whitespace-nowrap">
+                            Support
                         </span>
                     </div>
                 </div>
-            </div>
-        </header>
-
-        @* ── Main: 6-Card Grid ── *@
-        <main class="flex-1 flex items-center justify-center p-4 sm:p-8 md:p-12 relative z-10">
-            <div class="max-w-4xl w-full grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 justify-center items-center">
-                @foreach (var card in _menuCards)
-                {
-                    <MenuCard Icon="@card.Icon"
-                              OrbAccent="@card.OrbAccent"
-                              Title="@card.Title"
-                              Subtitle="@card.Subtitle"
-                              IconExtraCss="@card.IconExtraCss"
-                              SoundEnabled="@_soundEnabled" />
-                }
-            </div>
-        </main>
-
-        @* ── Footer ── *@
-        <footer class="relative z-50 pb-8 md:pb-12 px-6 md:px-8 animate-footer-in">
-            <div class="max-w-4xl mx-auto flex justify-between items-end">
-                <div class="flex gap-3 md:gap-4">
-                    <button @onclick="ToggleSound"
-                            class="footer-btn w-11 h-11 md:w-14 md:h-14
-                                   rounded-full @(_soundEnabled ? "bg-white/20" : "bg-white/8")
-                                   hover:bg-white/30
-                                   text-white flex items-center justify-center
-                                   backdrop-blur-md border border-white/10">
-                        <span class="material-symbols-outlined text-lg md:text-xl"
-                              style="font-variation-settings: 'FILL' 0;">
-                            @(_soundEnabled ? "volume_up" : "volume_off")
-                        </span>
-                    </button>
-                    <button class="footer-btn w-11 h-11 md:w-14 md:h-14
-                                   rounded-full bg-white/15 hover:bg-white/30
-                                   text-white flex items-center justify-center
-                                   backdrop-blur-md border border-white/10">
-                        <span class="material-symbols-outlined text-lg md:text-xl"
-                              style="font-variation-settings: 'FILL' 0;">
-                            power_settings_new
-                        </span>
-                    </button>
-                </div>
-
-                <div class="relative group">
-                    <button class="footer-btn w-12 h-12 md:w-16 md:h-16
-                                   rounded-full bg-white text-sky-600
-                                   shadow-xl shadow-black/10
-                                   flex items-center justify-center">
-                        <span class="material-symbols-outlined text-2xl md:text-3xl"
-                              style="font-variation-settings: 'FILL' 0, 'wght' 400;">
-                            help_outline
-                        </span>
-                    </button>
-                    <span class="support-tooltip
-                                 absolute right-full mr-3 md:mr-4 bottom-2 md:bottom-3
-                                 bg-white px-4 md:px-6 py-1.5 md:py-2
-                                 rounded-full text-sky-800 font-headline font-bold text-sm
-                                 shadow-lg opacity-0 group-hover:opacity-100
-                                 scale-90 group-hover:scale-100
-                                 whitespace-nowrap">
-                        Support
-                    </span>
-                </div>
-            </div>
-        </footer>
-    </div>
+            </footer>
+        </div>
+    </WavyBackground>
 }
 
 @code {
