@@ -1,0 +1,332 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════
+   AETHER CONSOLE — Tailwind v4 Theme
+   Nintendo Switch UI × Apple Vision Pro Liquid Glass
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme {
+  --color-azure: #0091ea;
+  --color-azure-deep: #0077c2;
+  --color-azure-glow: #42a5f5;
+  --font-headline: 'Fredoka', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  --animate-card-in: card-in 0.7s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+  --animate-nav-in: nav-in 0.5s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+  --animate-footer-in: footer-in 0.5s cubic-bezier(0.22, 1.5, 0.36, 1) 0.5s both;
+  --animate-bob: bob 1.4s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 5s ease-in-out infinite;
+  --animate-breathe: breathe 6s ease-in-out infinite;
+  --animate-wiggle: wiggle 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* ═══ Keyframes ═══ */
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.7);
+    filter: blur(4px);
+  }
+}
+
+@keyframes nav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+}
+
+@keyframes footer-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow:
+      0 8px 32px -6px rgba(0, 40, 100, 0.10),
+      inset 0 2px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(240, 240, 238, 0.8);
+  }
+  50% {
+    box-shadow:
+      0 14px 40px -6px rgba(0, 40, 100, 0.14),
+      inset 0 2px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(240, 240, 238, 0.8);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-4deg); }
+  40% { transform: rotate(3deg); }
+  60% { transform: rotate(-2deg); }
+  80% { transform: rotate(1deg); }
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* ═══ Base Reset ═══ */
+
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overflow: hidden;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══ Apple Liquid Glass ═══ */
+
+.liquid-glass {
+  /* Eggshell white — high opacity so it reads as WHITE, not blue.
+     The glass effect comes from blur + shadows + highlights, NOT transparency. */
+  background: rgba(252, 252, 250, 0.88);
+
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+
+  border: none;
+
+  box-shadow:
+    /* Drop shadow — soft navy-tinted lift */
+    0 8px 32px -6px rgba(0, 40, 100, 0.10),
+    /* Top inner highlight — specular light source from above */
+    inset 0 2px 0 rgba(255, 255, 255, 1),
+    /* Bottom inner edge — glass curvature */
+    inset 0 -1px 0 rgba(240, 240, 238, 0.8);
+}
+
+/* ═══ Menu Card ═══ */
+
+.menu-card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  -webkit-user-select: none;
+  border: none;
+
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Hover: Lift + Glass Glow ── */
+
+.menu-card:hover {
+  transform: translateY(-14px) scale(1.05);
+  box-shadow:
+    0 24px 48px -12px rgba(0, 40, 100, 0.16),
+    inset 0 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(240, 240, 238, 0.8);
+}
+
+/* ── Icon float on hover ── */
+
+.menu-card:hover .icon-orb {
+  animation: bob 1.4s ease-in-out infinite;
+}
+
+/* ── Shimmer sweep on hover ── */
+
+.menu-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+.menu-card:hover::before {
+  animation: shimmer-sweep 0.8s ease-out;
+}
+
+/* ── Active: Soft Pillow Press ── */
+
+.menu-card:active {
+  transform: scaleX(0.96) scaleY(1.03);
+  transition-duration: 0.15s;
+  box-shadow:
+    0 4px 12px -2px rgba(0, 50, 120, 0.14),
+    inset 0 1px 4px rgba(0, 50, 120, 0.06);
+}
+
+.menu-card:active .icon-orb {
+  transform: scale(0.94);
+  transition: transform 0.15s ease;
+}
+
+/* ── Focus Visible ── */
+
+.menu-card:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 4px;
+}
+
+/* ═══ Staggered Entrance ═══ */
+
+.menu-card:nth-child(1) { animation-delay: 0.08s; }
+.menu-card:nth-child(2) { animation-delay: 0.16s; }
+.menu-card:nth-child(3) { animation-delay: 0.24s; }
+.menu-card:nth-child(4) { animation-delay: 0.32s; }
+.menu-card:nth-child(5) { animation-delay: 0.40s; }
+.menu-card:nth-child(6) { animation-delay: 0.48s; }
+
+/* ═══ Icon Orbs ═══ */
+
+.icon-orb {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ═══ Material Symbols ═══ */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ═══ Nav Links ═══ */
+
+.nav-link {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 1px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ═══ Footer Buttons ═══ */
+
+.footer-btn {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.footer-btn:hover {
+  transform: scale(1.12) translateY(-2px);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.footer-btn:active {
+  transform: scale(0.92);
+  transition-duration: 0.12s;
+}
+
+/* ═══ Support Tooltip ═══ */
+
+.support-tooltip {
+  transform-origin: right center;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ═══ Background Gradient Overlay ═══ */
+
+.bg-gradient-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(56, 189, 248, 0.2) 0%,
+    rgba(37, 99, 235, 0.2) 100%
+  );
+}
+
+/* ═══ Ripple Effect ═══ */
+
+.ripple-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple-expand 1.4s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ═══ Loading Screen ═══ */
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #0091ea;
+  color: white;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

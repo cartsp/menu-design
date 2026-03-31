@@ -1,0 +1,179 @@
+@page "/"
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JS
+
+@if (!_started)
+{
+    @* ═══ SPLASH: "Tap to Start" — unlocks audio, then reveals menu ═══ *@
+    <div class="h-screen w-screen bg-azure flex flex-col items-center justify-center cursor-pointer select-none"
+         @onclick="StartApp">
+
+        <div class="flex flex-col items-center gap-8">
+            @* Logo *@
+            <div class="text-5xl md:text-7xl font-headline font-bold text-white tracking-wide
+                        animate-pulse drop-shadow-lg">
+                Menu Explorer
+            </div>
+
+            @* Subtitle prompt *@
+            <div class="text-white/50 text-sm md:text-base font-body font-semibold uppercase tracking-[0.3em]
+                        animate-bounce">
+                Click anywhere to start
+            </div>
+
+            @* Decorative dots *@
+            <div class="flex gap-2 mt-4">
+                <span class="w-2 h-2 rounded-full bg-white/40 animate-pulse" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 rounded-full bg-white/40 animate-pulse" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 rounded-full bg-white/40 animate-pulse" style="animation-delay: 0.4s"></span>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="h-screen w-screen bg-azure font-body text-slate-900 flex flex-col overflow-hidden relative">
+        @* ── Atmospheric Gradient Overlay ── *@
+        <div class="fixed inset-0 bg-gradient-overlay pointer-events-none animate-breathe"></div>
+
+        @* ── Header ── *@
+        <header class="relative z-50 pt-6 px-6 md:pt-8 md:px-8 animate-nav-in">
+            <div class="max-w-6xl mx-auto flex justify-between items-center
+                        bg-white/10 backdrop-blur-xl rounded-full
+                        py-3 px-6 md:py-4 md:px-8
+                        border border-white/20
+                        shadow-lg shadow-black/5">
+                <div class="text-xl md:text-2xl font-bold text-white font-headline tracking-wide select-none">
+                    Menu Explorer
+                </div>
+                <div class="flex items-center gap-4 md:gap-8">
+                    <nav class="hidden md:flex gap-8 items-center">
+                        <a class="nav-link text-white font-semibold text-sm cursor-pointer">Home</a>
+                        <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Settings</a>
+                        <a class="nav-link text-white/60 font-semibold text-sm hover:text-white/90 cursor-pointer">Help</a>
+                    </nav>
+                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden
+                                border-2 border-white/40 cursor-pointer
+                                hover:scale-110 transition-transform duration-300
+                                bg-white/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl md:text-2xl"
+                              style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
+                            person
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        @* ── Main: 6-Card Grid ── *@
+        <main class="flex-1 flex items-center justify-center p-4 sm:p-8 md:p-12 relative z-10">
+            <div class="max-w-4xl w-full grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 justify-center items-center">
+                @foreach (var card in _menuCards)
+                {
+                    <MenuCard Icon="@card.Icon"
+                              OrbAccent="@card.OrbAccent"
+                              Title="@card.Title"
+                              Subtitle="@card.Subtitle"
+                              IconExtraCss="@card.IconExtraCss"
+                              SoundEnabled="@_soundEnabled" />
+                }
+            </div>
+        </main>
+
+        @* ── Footer ── *@
+        <footer class="relative z-50 pb-8 md:pb-12 px-6 md:px-8 animate-footer-in">
+            <div class="max-w-4xl mx-auto flex justify-between items-end">
+                <div class="flex gap-3 md:gap-4">
+                    <button @onclick="ToggleSound"
+                            class="footer-btn w-11 h-11 md:w-14 md:h-14
+                                   rounded-full @(_soundEnabled ? "bg-white/20" : "bg-white/8")
+                                   hover:bg-white/30
+                                   text-white flex items-center justify-center
+                                   backdrop-blur-md border border-white/10">
+                        <span class="material-symbols-outlined text-lg md:text-xl"
+                              style="font-variation-settings: 'FILL' 0;">
+                            @(_soundEnabled ? "volume_up" : "volume_off")
+                        </span>
+                    </button>
+                    <button class="footer-btn w-11 h-11 md:w-14 md:h-14
+                                   rounded-full bg-white/15 hover:bg-white/30
+                                   text-white flex items-center justify-center
+                                   backdrop-blur-md border border-white/10">
+                        <span class="material-symbols-outlined text-lg md:text-xl"
+                              style="font-variation-settings: 'FILL' 0;">
+                            power_settings_new
+                        </span>
+                    </button>
+                </div>
+
+                <div class="relative group">
+                    <button class="footer-btn w-12 h-12 md:w-16 md:h-16
+                                   rounded-full bg-white text-sky-600
+                                   shadow-xl shadow-black/10
+                                   flex items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl md:text-3xl"
+                              style="font-variation-settings: 'FILL' 0, 'wght' 400;">
+                            help_outline
+                        </span>
+                    </button>
+                    <span class="support-tooltip
+                                 absolute right-full mr-3 md:mr-4 bottom-2 md:bottom-3
+                                 bg-white px-4 md:px-6 py-1.5 md:py-2
+                                 rounded-full text-sky-800 font-headline font-bold text-sm
+                                 shadow-lg opacity-0 group-hover:opacity-100
+                                 scale-90 group-hover:scale-100
+                                 whitespace-nowrap">
+                        Support
+                    </span>
+                </div>
+            </div>
+        </footer>
+    </div>
+}
+
+@code {
+    private readonly record struct MenuCardData(
+        string Icon,
+        string OrbAccent,
+        string Title,
+        string Subtitle,
+        string IconExtraCss = "");
+
+    private static readonly MenuCardData[] _menuCards =
+    [
+        new("play_arrow", "bg-sky-500 rounded-full shadow-sky-500/30", "Start", "New Game", "translate-x-[2px]"),
+        new("person", "rounded-full bg-gradient-to-br from-slate-700 to-slate-900 shadow-slate-500/30 border-2 border-slate-200/50", "Profile", "User Info"),
+        new("photo_library", "bg-rose-400 rounded-2xl md:rounded-3xl shadow-rose-400/30", "Gallery", "Moments"),
+        new("shopping_bag", "bg-emerald-400 rounded-2xl md:rounded-3xl shadow-emerald-400/30", "Shop", "Market"),
+        new("group", "bg-indigo-400 rounded-full shadow-indigo-400/30", "Friends", "4 Online"),
+        new("settings", "bg-slate-400 rounded-full shadow-slate-400/30", "Settings", "Options")
+    ];
+
+    private bool _started = false;
+    private bool _soundEnabled = true;
+
+    private async Task StartApp()
+    {
+        if (_started) return;
+        _started = true;
+
+        try
+        {
+            await JS.InvokeVoidAsync("unlockAudio");
+        }
+        catch (JSDisconnectedException)
+        {
+            // Runtime shutting down — expected during navigation/dispose
+        }
+        catch (JSException ex)
+        {
+            Console.WriteLine($"[Home] Audio unlock error: {ex.Message}");
+        }
+    }
+
+    private void ToggleSound()
+    {
+        _soundEnabled = !_soundEnabled;
+    }
+}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menu Explorer</title>
+    <base href="/" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Fonts: Fredoka (headlines) + Plus Jakarta Sans (body) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind v4 Output -->
+    <link rel="stylesheet" href="css/output.css" />
+
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="MenuDesign.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="loading-screen">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 1rem; opacity: 0.8; font-size: 0.875rem;">Loading Menu Explorer...</p>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+
+    <script>
+        // ═══ Audio — unlock aggressively on ANY user gesture ═══
+        let _audioCtx = null;
+        let _audioReady = false;
+
+        function getAudioCtx() {
+            if (!_audioCtx) {
+                _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return _audioCtx;
+        }
+
+        function ensureAudioReady() {
+            if (_audioReady) return;
+            const ctx = getAudioCtx();
+            if (ctx.state === 'suspended') {
+                ctx.resume().then(() => { _audioReady = true; });
+            } else if (ctx.state === 'running') {
+                _audioReady = true;
+            }
+        }
+
+        // Explicit unlock callable from Blazor (used on splash-screen click)
+        window.unlockAudio = function() { ensureAudioReady(); };
+
+        // Unlock on every possible user gesture — mousedown, touch, keyboard
+        document.addEventListener('mousedown', ensureAudioReady);
+        document.addEventListener('touchstart', ensureAudioReady);
+        document.addEventListener('keydown', ensureAudioReady);
+
+        // ═══ Soft Nintendo-style hover sound — warm gentle droplet ═══
+        window.playHoverBlip = async function() {
+            const ctx = getAudioCtx();
+
+            // Make absolutely sure context is running before scheduling
+            if (ctx.state === 'suspended') {
+                await ctx.resume();
+                _audioReady = true;
+            }
+
+            const now = ctx.currentTime;
+
+            // Main tone: warm sine with gentle pitch drop
+            const osc = ctx.createOscillator();
+            const oscGain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(480, now);
+            osc.frequency.exponentialRampToValueAtTime(320, now + 0.25);
+            oscGain.gain.setValueAtTime(0, now);
+            oscGain.gain.linearRampToValueAtTime(0.025, now + 0.01);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(oscGain);
+
+            // Sub-harmonic: low sine one octave down for warmth
+            const sub = ctx.createOscillator();
+            const subGain = ctx.createGain();
+            sub.type = 'sine';
+            sub.frequency.setValueAtTime(240, now);
+            sub.frequency.exponentialRampToValueAtTime(160, now + 0.25);
+            subGain.gain.setValueAtTime(0, now);
+            subGain.gain.linearRampToValueAtTime(0.012, now + 0.015);
+            subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            sub.connect(subGain);
+
+            const master = ctx.createGain();
+            master.gain.value = 0.8;
+            oscGain.connect(master);
+            subGain.connect(master);
+            master.connect(ctx.destination);
+
+            osc.start(now);
+            sub.start(now);
+            osc.stop(now + 0.35);
+            sub.stop(now + 0.3);
+        };
+
+        // ═══ Ripple effect on card click ═══
+        window.addRipple = function(element) {
+            ensureAudioReady();
+            if (!element) return;
+            const rect = element.getBoundingClientRect();
+            const container = element.querySelector('.ripple-container');
+            if (!container) return;
+
+            const ripple = document.createElement('span');
+            const size = Math.max(rect.width, rect.height) * 1.2;
+            ripple.className = 'ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (rect.width / 2 - size / 2) + 'px';
+            ripple.style.top = (rect.height / 2 - size / 2) + 'px';
+
+            container.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+        };
+    </script>
+</body>
+
+</html>
