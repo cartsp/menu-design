@@ -75,8 +75,7 @@
         let _audioCtx = null;
         let _hoverBuffer = null;
         let _hoverBufferLoading = false;
-        let _lastHoverTime = 0;
-        const HOVER_COOLDOWN_MS = 180;
+
 
         function getAudioCtx() {
             if (!_audioCtx) {
@@ -128,9 +127,6 @@
         function playHoverBlipFromBuffer() {
             if (!_hoverBuffer) return;
             if (!window._hoverSoundEnabled) return;
-            const now = performance.now();
-            if (now - _lastHoverTime < HOVER_COOLDOWN_MS) return;
-            _lastHoverTime = now;
 
             const ctx = getAudioCtx();
             if (ctx.state === 'suspended') {
@@ -140,18 +136,33 @@
             const source = ctx.createBufferSource();
             source.buffer = _hoverBuffer;
             const gainNode = ctx.createGain();
-            gainNode.gain.value = 0.15;
+            gainNode.gain.value = 0.06;
             source.connect(gainNode);
             gainNode.connect(ctx.destination);
             source.start(0);
         }
 
-        // ═══ Hover sound via native JS — uses buffer playback ═══
-        document.addEventListener('pointerenter', function(e) {
-            var card = e.target.closest && e.target.closest('.menu-card');
-            if (card && e.target === card) {
+        // ═══ Card hover state + sound — managed via JS to prevent
+        //     Edge flicker when transform moves the card edge ═══
+        var _hoverLeaveTimers = new WeakMap();
+
+        document.addEventListener('mouseenter', function(e) {
+            if (!e.target.classList || !e.target.classList.contains('menu-card')) return;
+            var pending = _hoverLeaveTimers.get(e.target);
+            if (pending) { clearTimeout(pending); _hoverLeaveTimers.delete(e.target); }
+            if (!e.target.classList.contains('is-hovered')) {
+                e.target.classList.add('is-hovered');
                 playHoverBlipFromBuffer();
             }
+        }, true);
+
+        document.addEventListener('mouseleave', function(e) {
+            if (!e.target.classList || !e.target.classList.contains('menu-card')) return;
+            var card = e.target;
+            _hoverLeaveTimers.set(card, setTimeout(function() {
+                card.classList.remove('is-hovered');
+                _hoverLeaveTimers.delete(card);
+            }, 200));
         }, true);
 
         // ═══ Ripple effect on card click ═══
