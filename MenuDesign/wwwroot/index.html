@@ -27,7 +27,16 @@
         /* Hide app content until fonts are loaded to prevent FOUT and icon text flash */
         .app-hidden { opacity: 0; }
         .app-ready { opacity: 1; transition: opacity 0.3s ease-in; }
+
+        /* Hide Material Symbols until the font is loaded — prevents icon text flash */
+        .material-symbols-outlined { opacity: 0; transition: opacity 0.15s ease-in; }
+        .fonts-loaded .material-symbols-outlined { opacity: 1; }
     </style>
+    <script>
+        document.fonts.load('24px "Material Symbols Outlined"').then(function() {
+            document.documentElement.classList.add('fonts-loaded');
+        });
+    </script>
 </head>
 
 <body>

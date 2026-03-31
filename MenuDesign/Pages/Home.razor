@@ -3,12 +3,7 @@
 
 @inject IJSRuntime JS
 
-@if (!_fontsReady)
-{
-    @* Blank screen while fonts load — prevents FOUT and icon text flash *@
-    <div class="h-screen w-screen bg-azure"></div>
-}
-else if (!_started)
+@if (!_started)
 {
     @* ═══ SPLASH: "Tap to Start" — unlocks audio, then reveals menu ═══ *@
     <div class="h-screen w-screen bg-azure flex flex-col items-center justify-center cursor-pointer select-none"
@@ -160,50 +155,25 @@ else
         new("settings", "bg-slate-400 rounded-full shadow-slate-400/30", "Settings", "Options")
     ];
 
-    private bool _fontsReady = false;
     private bool _started = false;
     private bool _soundEnabled = true;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                // Explicitly trigger loading of Material Symbols so it's ready before menu renders
-                await JS.InvokeVoidAsync("eval",
-                    "await document.fonts.load('24px \"Material Symbols Outlined\"'); await document.fonts.ready");
-                _fontsReady = true;
-                StateHasChanged();
-            }
-            catch
-            {
-                _fontsReady = true;
-                StateHasChanged();
-            }
-        }
-    }
 
     private async Task StartApp()
     {
         if (_started) return;
+        _started = true;
 
         try
         {
-            // Ensure icon font is fully loaded before revealing the menu
-            await JS.InvokeVoidAsync("eval",
-                "await document.fonts.load('24px \"Material Symbols Outlined\"')");
-            _started = true;
             await JS.InvokeVoidAsync("unlockAudio");
         }
         catch (JSDisconnectedException)
         {
-            _started = true;
+            // Runtime shutting down — expected during navigation/dispose
         }
         catch (JSException ex)
         {
-            _started = true;
-            Console.WriteLine($"[Home] StartApp error: {ex.Message}");
+            Console.WriteLine($"[Home] Audio unlock error: {ex.Message}");
         }
     }
 
