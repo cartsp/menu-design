@@ -162,7 +162,7 @@
             _hoverLeaveTimers.set(card, setTimeout(function() {
                 card.classList.remove('is-hovered');
                 _hoverLeaveTimers.delete(card);
-            }, 200));
+            }, 60));
         }, true);
 
         // ═══ Ripple effect on card click ═══
