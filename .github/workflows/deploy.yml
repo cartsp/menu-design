@@ -28,6 +28,9 @@ jobs:
       - name: Publish
         run: dotnet publish MenuDesign/MenuDesign.csproj -c Release -o release
 
+      - name: Copy dotnet.js into _framework
+        run: cp release/dotnet.js release/wwwroot/_framework/dotnet.js
+
       - name: Rewrite base href for GitHub Pages
         run: sed -i 's|<base href="/" />|<base href="/menu-design/" />|g' release/wwwroot/index.html
 
