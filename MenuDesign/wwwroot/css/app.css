@@ -147,7 +147,7 @@ html, body {
 
 .menu-card:hover {
   transform: scale(1.07);
-  background: rgba(200, 235, 255, 0.6);
+  background: rgba(255, 255, 255, 0.78);
   box-shadow:
     0 24px 48px -12px rgba(0, 40, 100, 0.16),
     inset 0 2px 0 rgba(255, 255, 255, 1),
