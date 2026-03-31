@@ -59,12 +59,12 @@
             return _audioCtx;
         }
 
-        // Load the hover WAV file into an AudioBuffer
+        // Load the hover sound into an AudioBuffer
         function loadHoverBuffer() {
             if (_hoverBuffer || _hoverBufferLoading) return;
             _hoverBufferLoading = true;
             const ctx = getAudioCtx();
-            fetch('audio/hover.wav')
+            fetch('audio/click-003.mp3')
                 .then(function(response) { return response.arrayBuffer(); })
                 .then(function(arrayBuffer) { return ctx.decodeAudioData(arrayBuffer); })
                 .then(function(buffer) {
@@ -116,9 +116,6 @@
             source.connect(ctx.destination);
             source.start(0);
         }
-
-        // Legacy Blazor-callable wrapper (kept for non-Safari browsers)
-        window.playHoverBlip = function() { playHoverBlipFromBuffer(); };
 
         // ═══ Hover sound via native JS — uses buffer playback ═══
         document.addEventListener('pointerenter', function(e) {
