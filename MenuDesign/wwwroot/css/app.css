@@ -148,7 +148,7 @@ html, body {
 
 /* ── Hover: Lift + Glass Glow ── */
 
-.menu-card.is-hovered {
+.menu-card:hover {
   transform: scale(1.07);
   box-shadow:
     0 24px 48px -12px rgba(0, 40, 100, 0.16),
@@ -158,7 +158,7 @@ html, body {
 
 /* ── Icon float on hover ── */
 
-.menu-card.is-hovered .icon-orb {
+.menu-card:hover .icon-orb {
   animation: bob 1.4s ease-in-out infinite;
 }
 
@@ -181,7 +181,7 @@ html, body {
   pointer-events: none;
 }
 
-.menu-card.is-hovered::before {
+.menu-card:hover::before {
   animation: shimmer-sweep 0.8s ease-out;
 }
 
