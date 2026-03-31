@@ -28,8 +28,35 @@ jobs:
       - name: Publish
         run: dotnet publish MenuDesign/MenuDesign.csproj -c Release -o release
 
-      - name: Copy dotnet.js into _framework
-        run: cp release/dotnet.js release/wwwroot/_framework/dotnet.js
+      - name: Resolve static web asset aliases for GitHub Pages
+        run: |
+          # .NET 10 uses fingerprinted filenames and an endpoints manifest
+          # for route aliases. GitHub Pages has no middleware, so we create
+          # physical copies for every alias that maps to a different file.
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const manifest = JSON.parse(fs.readFileSync('release/MenuDesign.staticwebassets.endpoints.json','utf8'));
+            const wwwroot = 'release/wwwroot';
+            for (const ep of manifest.Endpoints) {
+              const route = ep.Route;
+              const asset = ep.AssetFile;
+              // Skip if route and asset are the same (no alias needed)
+              if (route === asset) continue;
+              // Skip compressed variants — browsers won't request .br/.gz directly
+              if (route.endsWith('.br') || route.endsWith('.gz')) continue;
+              if (asset.endsWith('.br') || asset.endsWith('.gz')) continue;
+              const src = path.join(wwwroot, asset);
+              const dest = path.join(wwwroot, route);
+              if (fs.existsSync(src) && !fs.existsSync(dest)) {
+                fs.mkdirSync(path.dirname(dest), { recursive: true });
+                fs.copyFileSync(src, dest);
+                console.log(route + ' -> ' + asset);
+              }
+            }
+          "
+          # Also copy the root-level dotnet.js (entry point used by blazor.webassembly.js)
+          cp release/dotnet.js release/wwwroot/_framework/dotnet.js
 
       - name: Rewrite base href for GitHub Pages
         run: sed -i 's|<base href="/" />|<base href="/menu-design/" />|g' release/wwwroot/index.html
